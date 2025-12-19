@@ -1,0 +1,28 @@
+{
+  "name": "com.gnarlygamestudio.systemtimer",
+  "displayName": "System Timer",
+  "version": "1.0.0",
+  "unity": "6000.0.62f1",
+  "description": "This is easiest way to change date time on unity editor.",
+  "author": {
+    "name": "Gnarly Game Studio",
+    "email": "info@gnarlyteam.com",
+    "url": "https://github.com/Gnarly-Games"
+  },
+  "license": "MIT",
+  "keywords": [
+    "unity",
+    "plugin",
+    "management",
+    "editor",
+    "automation",
+    "setup",
+    "package-manager"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gnarly-Games/com.gnarlygamestudio.systemtimer.git"
+  },
+  "category": "Editor Tools",
+  "hideInEditor": false
+}

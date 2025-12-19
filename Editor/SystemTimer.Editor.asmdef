@@ -1,0 +1,18 @@
+{
+    "name": "SystemTimer.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4c09ad5617d4042128b8fde0ac7e5e10"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
