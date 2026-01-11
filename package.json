@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gnarly-Games/com.gnarlygamestudio.systemtimer.git"
+    "url": "https://github.com/Gnarly-Games/system-timer.git"
   },
   "category": "Editor Tools",
   "hideInEditor": false
