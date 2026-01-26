@@ -1,81 +1,113 @@
+using System;
 using System.Globalization;
 using UnityEditor;
+using UnityEditor.Toolbars;
 using UnityEngine;
 
 namespace Gnarly.Timer.Editor
 {
-    public class SystemTimerWindow : EditorWindow
+    [InitializeOnLoad]
+    public static class SystemTimerToolbar
+    {
+        private const string TimerPath = "Gnarly/System Timer";
+        private static double _lastUpdate;
+
+        static SystemTimerToolbar()
+        {
+            EditorApplication.update += OnUpdate;
+        }
+
+        private static void OnUpdate()
+        {
+            // Refresh the UI every second to keep the clock accurate
+            if (EditorApplication.timeSinceStartup - _lastUpdate > 1.0f)
+            {
+                _lastUpdate = EditorApplication.timeSinceStartup;
+                MainToolbar.Refresh(TimerPath); 
+            }
+        }
+
+        [MainToolbarElement(TimerPath, defaultDockPosition = MainToolbarDockPosition.Left)]
+        public static MainToolbarElement TimerButton()
+        {
+            var timeString = $"{SystemTimer.Now:MM/dd/yyyy HH:mm}";
+            var tooltip = $"Current simulated time. {SystemTimer.Now.DayOfWeek}";
+            
+            // Using a clock icon, or fallback to simple text if icon missing
+            var icon = EditorGUIUtility.IconContent("d_TimelineAsset Icon").image as Texture2D;
+            
+            var content = new MainToolbarContent(timeString, icon, tooltip);
+
+            return new MainToolbarButton(content, OnTimerClicked);
+        }
+
+        private static void OnTimerClicked()
+        {
+            SystemTimerWindow.ShowWindow();
+        }
+    }
+    
+     public class SystemTimerWindow : EditorWindow
     {
         public static void ShowWindow()
         {
-            GetWindow<SystemTimerWindow>("System Timer").Show();
+            var window = GetWindow<SystemTimerWindow>("System Timer");
+            window.minSize = new Vector2(300, 180);
+            window.Show();
         }
 
         private void OnGUI()
         {
-            GUILayout.Label(
-                $"{SystemTimer.Now.ToString(CultureInfo.InvariantCulture)} - {SystemTimer.Now.DayOfWeek}");
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"Days: {SystemTimer.DayOffset}", GUILayout.Width(100.0f));
-
-            if (GUILayout.Button("+"))
+            GUILayout.Space(10);
+            
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                SystemTimer.DayOffset++;
-                SystemTimerEditor.Save();
+                GUILayout.Label($"{SystemTimer.Now.ToString(CultureInfo.InvariantCulture)}", EditorStyles.boldLabel);
+                GUILayout.Label($"{SystemTimer.Now.DayOfWeek}", EditorStyles.miniLabel);
             }
 
-            if (GUILayout.Button("-"))
-            {
-                SystemTimer.DayOffset--;
-                SystemTimerEditor.Save();
-            }
+            GUILayout.Space(10);
 
-            GUILayout.EndHorizontal();
+            DrawOffsetControl("Days", SystemTimer.DayOffset, v => SystemTimer.DayOffset = v);
+            DrawOffsetControl("Hours", SystemTimer.HourOffset, v => SystemTimer.HourOffset = v);
+            DrawOffsetControl("Minutes", SystemTimer.MinuteOffset, v => SystemTimer.MinuteOffset = v);
 
-            GUILayout.BeginHorizontal();
+            GUILayout.Space(20);
 
-            GUILayout.Label($"Hours: {SystemTimer.HourOffset}", GUILayout.Width(100.0f));
-            if (GUILayout.Button("+"))
-            {
-                SystemTimer.HourOffset++;
-                SystemTimerEditor.Save();
-            }
-
-            if (GUILayout.Button("-"))
-            {
-                SystemTimer.HourOffset--;
-                SystemTimerEditor.Save();
-            }
-
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Label($"Minutes: {SystemTimer.MinuteOffset}", GUILayout.Width(100.0f));
-            if (GUILayout.Button("+"))
-            {
-                SystemTimer.MinuteOffset++;
-                SystemTimerEditor.Save();
-            }
-
-            if (GUILayout.Button("-"))
-            {
-                SystemTimer.MinuteOffset--;
-                SystemTimerEditor.Save();
-            }
-
-            GUILayout.EndHorizontal();
-
-            EditorGUILayout.Space(10);
-            if (GUILayout.Button("Reset"))
+            if (GUILayout.Button("Reset Timer", GUILayout.Height(30)))
             {
                 SystemTimer.DayOffset = 0;
                 SystemTimer.HourOffset = 0;
                 SystemTimer.MinuteOffset = 0;
-
-                SystemTimerEditor.Save();
+                MainToolbar.Refresh("Gnarly/System Timer");
             }
+        }
+
+        private void DrawOffsetControl(string label, int value, Action<int> onValueChanged)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label(label, GUILayout.Width(60));
+                GUILayout.Label(value.ToString(), EditorStyles.boldLabel, GUILayout.Width(40));
+
+                if (GUILayout.Button("-", GUILayout.Width(30)))
+                {
+                    onValueChanged(value - 1);
+                    MainToolbar.Refresh("Gnarly/System Timer");
+                }
+
+                if (GUILayout.Button("+", GUILayout.Width(30)))
+                {
+                    onValueChanged(value + 1);
+                    MainToolbar.Refresh("Gnarly/System Timer");
+                }
+            }
+        }
+        
+        // Ensure the window repaints to show ticking time if open
+        private void OnInspectorUpdate()
+        {
+            Repaint();
         }
     }
 }
